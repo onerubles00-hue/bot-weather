@@ -1,34 +1,77 @@
 import requests
+import logging
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
+
+# 🔧 Логи (очень полезно)
+logging.basicConfig(level=logging.INFO)
 
 TOKEN = ""
 API_KEY = ""
-CHAT_ID = 
+
+# ✅ список чатов
+CHAT_IDS = [
+    -111111111,
+    -111111111
+]
 
 async def send_weather(context: ContextTypes.DEFAULT_TYPE):
     city = "Dnipro"
 
-    url = f"http://api.openweathermap.org/data/2.5/weather?q={city}&appid={API_KEY}&units=metric&lang=ru"
-    response = requests.get(url).json()
+    try:
+        url = f"http://api.openweathermap.org/data/2.5/weather?q={city}&appid={API_KEY}&units=metric&lang=ru"
+        response = requests.get(url).json()
 
-    if response.get("main"):
-        temp = response["main"]["temp"]
-        desc = response["weather"][0]["description"]
+        if response.get("main"):
+            temp = response["main"]["temp"]
+            desc = response["weather"][0]["description"]
 
-        text = f"🌍 Днепр\n🌡 {temp}°C\n☁️ {desc}"
-    else:
-        text = "Ошибка погоды 😢"
+            text = f"🌍 Днепр\n🌡 {temp}°C\n☁️ {desc}"
+        else:
+            text = "Ошибка погоды 😢"
 
-    await context.bot.send_message(chat_id=CHAT_ID, text=text)
+    except Exception as e:
+        print("[ERROR] API:", e)
+        text = "Ошибка получения погоды 😢"
+
+    # 🔥 отправка во все чаты
+    for chat_id in CHAT_IDS:
+        try:
+            print(f"[DEBUG] отправка в {chat_id}")
+
+            await context.bot.send_message(
+                chat_id=chat_id,
+                text=text
+            )
+
+            print(f"[OK] отправлено в {chat_id}")
+
+        except Exception as e:
+            print(f"[ERROR] чат {chat_id}: {e}")
 
 
-async def start(update, context):
+async def startweather(update, context):
     await update.message.reply_text("Авто-погода включена ✅")
 
-    # каждый час
-    context.job_queue.run_repeating(send_weather, interval=3600, first=0)
+    # 🔥 сразу отправка
+    await send_weather(context)
+
+    # 🔥 каждый час
+    context.job_queue.run_repeating(
+        send_weather,
+        interval=3600,
+        first=3600  # через час (можешь поставить 0)
+    )
+
+
+def error_handler(update, context):
+    print(f"[CRASH] {context.error}")
+
 
 app = ApplicationBuilder().token(TOKEN).build()
-app.add_handler(CommandHandler("start", start))
+
+app.add_handler(CommandHandler("startweather", startweather))
+app.add_error_handler(error_handler)
+
+print("🚀 Бот запущен...")
 
 app.run_polling()
