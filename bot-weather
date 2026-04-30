@@ -1,8 +1,8 @@
 import requests
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 
-TOKEN = "5054747479:AAFypEbm8AxG2nrCTAu52z41f-uvCPHYtRA"
-API_KEY = "693dd47adc1d9e11a5570ff82dd32854"
+TOKEN = ""
+API_KEY = ""
 CHAT_ID = -5234545285
 
 async def send_weather(context: ContextTypes.DEFAULT_TYPE):
