@@ -3,7 +3,7 @@ from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 
 TOKEN = ""
 API_KEY = ""
-CHAT_ID = -5234545285
+CHAT_ID = 
 
 async def send_weather(context: ContextTypes.DEFAULT_TYPE):
     city = "Dnipro"
